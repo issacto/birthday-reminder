@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:collection';
 
 void main() {
   runApp(MyApp());
@@ -22,12 +23,14 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  HashMap birthmonthMap = new HashMap<int, dynamic>();
   TextEditingController nameTextController = TextEditingController();
   TextEditingController birthdatTextController = TextEditingController();
 
@@ -39,9 +42,56 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _incrementCounter() {
-    print(DateFormat.yMd().parse(birthdatTextController.text));
-    print(nameTextController.text + birthdatTextController.text);
+  //store  birthday
+  void storeBirthday() {}
+
+  //verify the month of the input from uaser
+  bool verifyMonth(date) {
+    try {
+      var day = int.parse(date[0] + date[1]);
+      var month = int.parse(date[3] + date[4]);
+      var year = int.parse(date[6] + date[7] + date[8] + date[9]);
+
+      if (day > 0 && day < 32 && month > 0 && month < 13) {
+        var birthdate = DateTime.utc(year, month, day);
+        DateTime todayDate = DateTime.now();
+        print("day: ");
+        print(birthdate);
+        print(day);
+        print(month);
+        print(year);
+        print(todayDate);
+        if (birthdate.isBefore(todayDate)) {
+          print("here we go");
+          return true;
+        } else {
+          print('Could not input future birthday!');
+        }
+      } else {
+        print("Date/Month input is incorrect");
+        return false;
+      }
+    } on FormatException {
+      print('Format error!');
+      return false;
+    }
+    //if (int.parse(day)) {}
+    return false;
+  }
+
+  bool verifyNameNotEmpty(name) {
+    if (name != null && name != "") {
+      return true;
+    }
+    return false;
+  }
+
+  void _processInput() {
+    if (verifyNameNotEmpty(nameTextController.text) &&
+        verifyMonth(birthdatTextController.text)) {
+      nameTextController.text = "";
+      birthdatTextController.text = "";
+    }
   }
 
   @override
@@ -98,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _processInput,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
