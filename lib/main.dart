@@ -11,11 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Birthday Reminder',
+      title: 'Birthday Reminder 🎂',
       theme: ThemeData(
         primarySwatch: Colors.teal,
       ),
-      home: MyHomePage(title: 'Birthday Reminder'),
+      home: MyHomePage(title: 'Birthday Reminder 🎂'),
     );
   }
 }
@@ -33,6 +33,20 @@ class _MyHomePageState extends State<MyHomePage> {
   HashMap birthmonthMap = new HashMap<int, dynamic>();
   TextEditingController nameTextController = TextEditingController();
   TextEditingController birthdatTextController = TextEditingController();
+  var monthsList = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ];
 
   final _nameKey = GlobalKey<FormState>();
 
@@ -48,30 +62,34 @@ class _MyHomePageState extends State<MyHomePage> {
   //verify the month of the input from uaser
   bool verifyMonth(date) {
     try {
-      var day = int.parse(date[0] + date[1]);
-      var month = int.parse(date[3] + date[4]);
-      var year = int.parse(date[6] + date[7] + date[8] + date[9]);
+      if (date.length >= 10) {
+        var day = int.parse(date[0] + date[1]);
+        var month = int.parse(date[3] + date[4]);
+        var year = int.parse(date[6] + date[7] + date[8] + date[9]);
 
-      if (day > 0 && day < 32 && month > 0 && month < 13) {
-        var birthdate = DateTime.utc(year, month, day);
-        DateTime todayDate = DateTime.now();
-        print("day: ");
-        print(birthdate);
-        print(day);
-        print(month);
-        print(year);
-        print(todayDate);
-        if (birthdate.isBefore(todayDate)) {
-          print("here we go");
-          return true;
+        if (day > 0 && day < 32 && month > 0 && month < 13) {
+          var birthdate = DateTime.utc(year, month, day);
+          DateTime todayDate = DateTime.now();
+          print("day: ");
+          print(birthdate);
+          print(day);
+          print(month);
+          print(year);
+          print(todayDate);
+          if (birthdate.isBefore(todayDate)) {
+            print("here we go");
+            return true;
+          } else {
+            print('Could not input future birthday!');
+          }
         } else {
-          print('Could not input future birthday!');
+          print("Date/Month input is incorrect");
+          return false;
         }
       } else {
-        print("Date/Month input is incorrect");
         return false;
       }
-    } on FormatException {
+    } on Exception {
       print('Format error!');
       return false;
     }
@@ -91,7 +109,39 @@ class _MyHomePageState extends State<MyHomePage> {
         verifyMonth(birthdatTextController.text)) {
       nameTextController.text = "";
       birthdatTextController.text = "";
+      showAlertDialog(
+          context, "Submitted", "Thank you. The record is submitted");
+    } else {
+      showAlertDialog(context, "Error",
+          "Input is incorrect. Name could not be null and birthday should be in DD/MM/YYYY format.");
     }
+  }
+
+  showAlertDialog(BuildContext context, title, text) {
+    // set up the button
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(text),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -109,24 +159,37 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-                height: 350,
+                height: 450,
                 child: Column(children: <Widget>[
-                  Text('Birthdays'),
+                  Text(
+                    'Birthdays',
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
                   Divider(),
                   Expanded(
                     child: ListView.builder(
                         shrinkWrap: true,
                         itemCount: 12,
                         itemBuilder: (BuildContext context, int index) {
-                          return Text((index + 1).toString());
+                          return Center(
+                              child: Container(
+                                  margin: EdgeInsets.only(top: 10),
+                                  child: Text(
+                                    monthsList[index],
+                                    style:
+                                        Theme.of(context).textTheme.headline5,
+                                  )));
                         }),
                   )
                 ])),
-            Text(
-              'New Record',
-              style: Theme.of(context).textTheme.headline4,
-            ),
             Container(
+                margin: EdgeInsets.only(top: 10),
+                child: Text(
+                  'New Record',
+                  style: Theme.of(context).textTheme.headline4,
+                )),
+            Container(
+              margin: EdgeInsets.only(top: 15),
               width: 200.0,
               child: TextFormField(
                 controller: nameTextController,
