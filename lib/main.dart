@@ -30,7 +30,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  HashMap birthmonthMap = new HashMap<int, dynamic>();
+  List<List<dynamic>> data = new List.generate(12, (i) => []);
+  HashMap birthmonthMap = new HashMap<int, List<dynamic>>();
   TextEditingController nameTextController = TextEditingController();
   TextEditingController birthdatTextController = TextEditingController();
   var monthsList = [
@@ -47,8 +48,11 @@ class _MyHomePageState extends State<MyHomePage> {
     "Nov",
     "Dec"
   ];
-
-  final _nameKey = GlobalKey<FormState>();
+  List<bool> monthExpandedList = List.filled(12, false);
+  String tempName = "";
+  int tempBDate = 0;
+  int tempBMonth = 0;
+  int tempBYear = 0;
 
   void _storeRecord(name, date) {
     setState(() {
@@ -57,7 +61,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   //store  birthday
-  void storeBirthday() {}
+  void storeBirthday(day, month, year) {
+    var monthList = data[month - 1];
+    print(data);
+    monthList.add({"name": nameTextController.text, "day": day, "year": year});
+    print(data);
+  }
 
   //verify the month of the input from uaser
   bool verifyMonth(date) {
@@ -70,14 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
         if (day > 0 && day < 32 && month > 0 && month < 13) {
           var birthdate = DateTime.utc(year, month, day);
           DateTime todayDate = DateTime.now();
-          print("day: ");
-          print(birthdate);
-          print(day);
-          print(month);
-          print(year);
-          print(todayDate);
           if (birthdate.isBefore(todayDate)) {
-            print("here we go");
+            storeBirthday(day, month, year);
             return true;
           } else {
             print('Could not input future birthday!');
@@ -172,13 +175,40 @@ class _MyHomePageState extends State<MyHomePage> {
                         itemCount: 12,
                         itemBuilder: (BuildContext context, int index) {
                           return Center(
-                              child: Container(
-                                  margin: EdgeInsets.only(top: 10),
-                                  child: Text(
-                                    monthsList[index],
-                                    style:
-                                        Theme.of(context).textTheme.headline5,
-                                  )));
+                            child: Container(
+                              margin: EdgeInsets.all(10),
+                              color: Colors.green,
+                              child: ExpansionPanelList(
+                                animationDuration: Duration(milliseconds: 2000),
+                                children: [
+                                  ExpansionPanel(
+                                    headerBuilder: (context, isExpanded) {
+                                      return ListTile(
+                                          title: new Center(
+                                        child: new Text(
+                                          monthsList[index],
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      ));
+                                    },
+                                    body: ListTile(
+                                      title: Text('Description text',
+                                          style:
+                                              TextStyle(color: Colors.black)),
+                                    ),
+                                    isExpanded: monthExpandedList[index],
+                                    canTapOnHeader: true,
+                                  ),
+                                ],
+                                dividerColor: Colors.grey,
+                                expansionCallback: (panelIndex, isExpanded) {
+                                  monthExpandedList[index] =
+                                      !monthExpandedList[index];
+                                  setState(() {});
+                                },
+                              ),
+                            ),
+                          );
                         }),
                   )
                 ])),
