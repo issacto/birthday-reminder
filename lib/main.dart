@@ -62,10 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   //store  birthday
   void storeBirthday(day, month, year) {
-    var monthList = data[month - 1];
-    print(data);
-    monthList.add({"name": nameTextController.text, "day": day, "year": year});
-    print(data);
+    setState(() {
+      data[month - 1]
+          .add({"name": nameTextController.text, "day": day, "year": year});
+    });
   }
 
   //verify the month of the input from uaser
@@ -179,26 +179,71 @@ class _MyHomePageState extends State<MyHomePage> {
                               margin: EdgeInsets.all(10),
                               color: Colors.green,
                               child: ExpansionPanelList(
-                                animationDuration: Duration(milliseconds: 2000),
+                                animationDuration: Duration(milliseconds: 1000),
                                 children: [
-                                  ExpansionPanel(
-                                    headerBuilder: (context, isExpanded) {
-                                      return ListTile(
-                                          title: new Center(
-                                        child: new Text(
-                                          monthsList[index],
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ));
-                                    },
-                                    body: ListTile(
-                                      title: Text('Description text',
-                                          style:
-                                              TextStyle(color: Colors.black)),
+                                  if (data[index].length == 0) ...[
+                                    ExpansionPanel(
+                                      headerBuilder: (context, isExpanded) {
+                                        return ListTile(
+                                            title: new Center(
+                                          child: new Text(
+                                            monthsList[index] +
+                                                "(" +
+                                                data[index].length.toString() +
+                                                ")",
+                                            style:
+                                                TextStyle(color: Colors.black),
+                                          ),
+                                        ));
+                                      },
+                                      body: ListTile(
+                                        title: Text('No birthday this month',
+                                            style:
+                                                TextStyle(color: Colors.black)),
+                                      ),
+                                      isExpanded: monthExpandedList[index],
+                                      canTapOnHeader: true,
                                     ),
-                                    isExpanded: monthExpandedList[index],
-                                    canTapOnHeader: true,
-                                  ),
+                                  ] else ...[
+                                    ExpansionPanel(
+                                      headerBuilder: (context, isExpanded) {
+                                        return ListTile(
+                                            title: new Center(
+                                          child: new Text(
+                                            monthsList[index] +
+                                                "(" +
+                                                data[index].length.toString() +
+                                                ")",
+                                            style:
+                                                TextStyle(color: Colors.green),
+                                          ),
+                                        ));
+                                      },
+                                      body: ListTile(
+                                        title: ListView.builder(
+                                          scrollDirection: Axis.vertical,
+                                          shrinkWrap: true,
+                                          itemCount: data[index].length,
+                                          itemBuilder: (context, newIndex) {
+                                            return new Center(
+                                                child: Text(
+                                              "Name: " +
+                                                  data[index][newIndex]
+                                                      ["name"] +
+                                                  " Birthdate: " +
+                                                  data[index][newIndex]["day"]
+                                                      .toString() +
+                                                  monthsList[index] +
+                                                  data[index][newIndex]["year"]
+                                                      .toString(),
+                                            ));
+                                          },
+                                        ),
+                                      ),
+                                      isExpanded: monthExpandedList[index],
+                                      canTapOnHeader: true,
+                                    ),
+                                  ],
                                 ],
                                 dividerColor: Colors.grey,
                                 expansionCallback: (panelIndex, isExpanded) {
