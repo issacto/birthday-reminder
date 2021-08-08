@@ -280,6 +280,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     ),
                                                     onPressed: () {
                                                       //delete record
+
+                                                      showTwoAlertDialog(
+                                                          context,
+                                                          data[index][newIndex]
+                                                              ["name"]);
+                                                      setState(() {
+                                                        data[index]
+                                                            .removeAt(newIndex);
+                                                      });
                                                     },
                                                     child: Text(
                                                       'Delete',
@@ -346,4 +355,21 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+showTwoAlertDialog(BuildContext context, String name) {
+  // set up the buttons
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Data deleted"),
+    content: Text("This record from $name is deleted."),
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
 }
