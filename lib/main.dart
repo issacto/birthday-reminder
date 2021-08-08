@@ -152,6 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.lightGreen[50],
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -235,34 +236,56 @@ class _MyHomePageState extends State<MyHomePage> {
                                           itemBuilder: (context, newIndex) {
                                             return new Center(
                                                 child: new Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
                                                             .center,
                                                     children: [
-                                                  Text(
-                                                    "\n" +
-                                                        "Name: " +
-                                                        data[index][newIndex]
-                                                            ["name"] +
-                                                        " Birth Date: " +
-                                                        data[index][newIndex]
-                                                                ["day"]
-                                                            .toString() +
-                                                        " " +
-                                                        monthsList[index] +
-                                                        " " +
-                                                        data[index][newIndex]
-                                                                ["year"]
-                                                            .toString() +
-                                                        " " +
-                                                        "\n",
-                                                    style: TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.black),
-                                                  ),
-                                                  TextButton(
+                                                  new Expanded(
+                                                      flex: 1,
+                                                      child:
+                                                          new SingleChildScrollView(
+                                                              scrollDirection:
+                                                                  Axis.horizontal,
+                                                              child: Text(
+                                                                "\n" +
+                                                                    "Name: " +
+                                                                    data[index][
+                                                                            newIndex]
+                                                                        [
+                                                                        "name"] +
+                                                                    " Birth Date: " +
+                                                                    data[index][newIndex]
+                                                                            [
+                                                                            "day"]
+                                                                        .toString() +
+                                                                    " " +
+                                                                    monthsList[
+                                                                        index] +
+                                                                    " " +
+                                                                    data[index][newIndex]
+                                                                            [
+                                                                            "year"]
+                                                                        .toString() +
+                                                                    " " +
+                                                                    "\n",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        16.0,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Colors
+                                                                        .black),
+                                                                softWrap: false,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .fade,
+                                                              ))),
+                                                  Flexible(
+                                                      child: TextButton(
                                                     style: ButtonStyle(
                                                       overlayColor:
                                                           MaterialStateProperty
@@ -297,8 +320,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           color: Colors.black),
+                                                      softWrap: false,
+                                                      overflow:
+                                                          TextOverflow.fade,
                                                     ),
-                                                  )
+                                                  ))
                                                 ]));
                                           },
                                         ),
