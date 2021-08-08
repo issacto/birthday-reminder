@@ -65,6 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       data[month - 1]
           .add({"name": nameTextController.text, "day": day, "year": year});
+      //sort
+      data[month - 1].sort((a, b) => a["day"].compareTo(b["day"]));
     });
   }
 
@@ -150,6 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightGreen[50],
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
@@ -191,16 +194,19 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 "(" +
                                                 data[index].length.toString() +
                                                 ")",
-                                            style:
-                                                TextStyle(color: Colors.black),
+                                            style: TextStyle(
+                                                fontSize: 18.0,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
                                           ),
                                         ));
                                       },
                                       body: ListTile(
-                                        title: Text('No birthday this month',
+                                          title: Center(
+                                        child: Text('No birthday this month',
                                             style:
                                                 TextStyle(color: Colors.black)),
-                                      ),
+                                      )),
                                       isExpanded: monthExpandedList[index],
                                       canTapOnHeader: true,
                                     ),
@@ -214,8 +220,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 "(" +
                                                 data[index].length.toString() +
                                                 ")",
-                                            style:
-                                                TextStyle(color: Colors.green),
+                                            style: TextStyle(
+                                                fontSize: 18.0,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green),
                                           ),
                                         ));
                                       },
@@ -226,17 +234,63 @@ class _MyHomePageState extends State<MyHomePage> {
                                           itemCount: data[index].length,
                                           itemBuilder: (context, newIndex) {
                                             return new Center(
-                                                child: Text(
-                                              "Name: " +
-                                                  data[index][newIndex]
-                                                      ["name"] +
-                                                  " Birthdate: " +
-                                                  data[index][newIndex]["day"]
-                                                      .toString() +
-                                                  monthsList[index] +
-                                                  data[index][newIndex]["year"]
-                                                      .toString(),
-                                            ));
+                                                child: new Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                  Text(
+                                                    "\n" +
+                                                        "Name: " +
+                                                        data[index][newIndex]
+                                                            ["name"] +
+                                                        " Birth Date: " +
+                                                        data[index][newIndex]
+                                                                ["day"]
+                                                            .toString() +
+                                                        " " +
+                                                        monthsList[index] +
+                                                        " " +
+                                                        data[index][newIndex]
+                                                                ["year"]
+                                                            .toString() +
+                                                        " " +
+                                                        "\n",
+                                                    style: TextStyle(
+                                                        fontSize: 16.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black),
+                                                  ),
+                                                  TextButton(
+                                                    style: ButtonStyle(
+                                                      overlayColor:
+                                                          MaterialStateProperty
+                                                              .resolveWith<
+                                                                  Color>((Set<
+                                                                      MaterialState>
+                                                                  states) {
+                                                        if (states.contains(
+                                                            MaterialState
+                                                                .focused))
+                                                          return Colors.red;
+                                                        return Colors
+                                                            .green; // Defer to the widget's default.
+                                                      }),
+                                                    ),
+                                                    onPressed: () {
+                                                      //delete record
+                                                    },
+                                                    child: Text(
+                                                      'Delete',
+                                                      style: TextStyle(
+                                                          fontSize: 10.0,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.black),
+                                                    ),
+                                                  )
+                                                ]));
                                           },
                                         ),
                                       ),
@@ -258,7 +312,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                 ])),
             Container(
-                margin: EdgeInsets.only(top: 10),
+                margin: EdgeInsets.only(top: 20),
                 child: Text(
                   'New Record',
                   style: Theme.of(context).textTheme.headline4,
