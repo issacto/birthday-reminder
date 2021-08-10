@@ -1,6 +1,6 @@
 # Birthday Reminder
 
-img["assets/demo.png"]
+![demo]("assets/demo.png")
 
 ## Local:
 ```
