@@ -1,6 +1,6 @@
 # Birthday Reminder
 
-![]("/assets/demo.png")
+<img src="/assets/demo.png">
 
 ## Local:
 ```
