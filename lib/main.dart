@@ -124,14 +124,14 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       x = (prefs.getString('data') ?? "");
     });
-    print("x");
-    print(x);
+    //print("x");
+    //print(x);
     if (x != "") {
       dynamic tempData = jsonDecode(x);
       //data = tempData["data"];
       var i = 0;
       for (var z in tempData["data"]) {
-        print(z);
+        //print(z);
         for (var zz in z) {
           data[i].add(zz);
         }

@@ -1,12 +1,10 @@
+# Birthday Reminder
 
+img["assets/demo.png"]
 
-# Commands:
-flutter run -d chrome
-
-# Open:
-build/app/outputs/flutter-apk/app-release.apk
-
-
-# Things left to do
-1. Notification
-2. Deploy on Android
+## Local:
+```
+flutter run 
+flutter build apk
+//build/app/outputs/flutter-apk/app-release.apk
+```
