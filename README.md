@@ -2,6 +2,8 @@
 
 <img src="/assets/demo.png">
 
+* Available through website and android
+
 ## Local:
 ```
 flutter run 
