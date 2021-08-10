@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'dart:collection';
 
 void main() {
@@ -14,6 +19,9 @@ class MyApp extends StatelessWidget {
       title: 'Birthday Reminder 🎂',
       theme: ThemeData(
         primarySwatch: Colors.teal,
+        textTheme: const TextTheme(
+          headline4: TextStyle(color: Colors.white),
+        ),
       ),
       home: MyHomePage(title: 'Birthday Reminder 🎂'),
     );
@@ -29,7 +37,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
   List<List<dynamic>> data = new List.generate(12, (i) => []);
   HashMap birthmonthMap = new HashMap<int, List<dynamic>>();
   TextEditingController nameTextController = TextEditingController();
@@ -54,12 +63,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int tempBMonth = 0;
   int tempBYear = 0;
 
-  void _storeRecord(name, date) {
-    setState(() {
-      _counter++;
-    });
-  }
-
   //store  birthday
   void storeBirthday(day, month, year) {
     setState(() {
@@ -67,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
           .add({"name": nameTextController.text, "day": day, "year": year});
       //sort
       data[month - 1].sort((a, b) => a["day"].compareTo(b["day"]));
+      updateLocalStorage();
     });
   }
 
@@ -109,6 +113,33 @@ class _MyHomePageState extends State<MyHomePage> {
     return false;
   }
 
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String x = "";
+    setState(() {
+      x = (prefs.getString('data') ?? "");
+    });
+    print("x");
+    print(x);
+    if (x != "") {
+      dynamic tempData = jsonDecode(x);
+      //data = tempData["data"];
+      var i = 0;
+      for (var z in tempData["data"]) {
+        print(z);
+        for (var zz in z) {
+          data[i].add(zz);
+        }
+        i += 1;
+      }
+    }
+  }
+
   void _processInput() {
     if (verifyNameNotEmpty(nameTextController.text) &&
         verifyMonth(birthdatTextController.text)) {
@@ -120,6 +151,13 @@ class _MyHomePageState extends State<MyHomePage> {
       showAlertDialog(context, "Error",
           "Input is incorrect. Name could not be null and birthday should be in DD/MM/YYYY format.");
     }
+  }
+
+  void updateLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setString('data', jsonEncode({"data": data}));
+    });
   }
 
   showAlertDialog(BuildContext context, title, text) {
@@ -151,229 +189,236 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.lightGreen[50],
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-                height: 450,
-                child: Column(children: <Widget>[
-                  Text(
-                    'Birthdays',
-                    style: Theme.of(context).textTheme.headline4,
-                  ),
-                  Divider(),
-                  Expanded(
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: 12,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Center(
-                            child: Container(
-                              margin: EdgeInsets.all(10),
-                              color: Colors.green,
-                              child: ExpansionPanelList(
-                                animationDuration: Duration(milliseconds: 1000),
-                                children: [
-                                  if (data[index].length == 0) ...[
-                                    ExpansionPanel(
-                                      headerBuilder: (context, isExpanded) {
-                                        return ListTile(
-                                            title: new Center(
-                                          child: new Text(
-                                            monthsList[index] +
-                                                "(" +
-                                                data[index].length.toString() +
-                                                ")",
-                                            style: TextStyle(
-                                                fontSize: 18.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black),
-                                          ),
-                                        ));
-                                      },
-                                      body: ListTile(
-                                          title: Center(
-                                        child: Text('No birthday this month',
-                                            style:
-                                                TextStyle(color: Colors.black)),
-                                      )),
-                                      isExpanded: monthExpandedList[index],
-                                      canTapOnHeader: true,
-                                    ),
-                                  ] else ...[
-                                    ExpansionPanel(
-                                      headerBuilder: (context, isExpanded) {
-                                        return ListTile(
-                                            title: new Center(
-                                          child: new Text(
-                                            monthsList[index] +
-                                                "(" +
-                                                data[index].length.toString() +
-                                                ")",
-                                            style: TextStyle(
-                                                fontSize: 18.0,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.green),
-                                          ),
-                                        ));
-                                      },
-                                      body: ListTile(
-                                        title: ListView.builder(
-                                          scrollDirection: Axis.vertical,
-                                          shrinkWrap: true,
-                                          itemCount: data[index].length,
-                                          itemBuilder: (context, newIndex) {
-                                            return new Center(
-                                                child: new Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                  new Expanded(
-                                                      flex: 1,
-                                                      child:
-                                                          new SingleChildScrollView(
-                                                              scrollDirection:
-                                                                  Axis.horizontal,
-                                                              child: Text(
-                                                                "\n" +
-                                                                    "Name: " +
-                                                                    data[index][
-                                                                            newIndex]
-                                                                        [
-                                                                        "name"] +
-                                                                    " Birth Date: " +
-                                                                    data[index][newIndex]
-                                                                            [
-                                                                            "day"]
-                                                                        .toString() +
-                                                                    " " +
-                                                                    monthsList[
-                                                                        index] +
-                                                                    " " +
-                                                                    data[index][newIndex]
-                                                                            [
-                                                                            "year"]
-                                                                        .toString() +
-                                                                    " " +
-                                                                    "\n",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        16.0,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black),
-                                                                softWrap: false,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .fade,
-                                                              ))),
-                                                  Flexible(
-                                                      child: TextButton(
-                                                    style: ButtonStyle(
-                                                      overlayColor:
-                                                          MaterialStateProperty
-                                                              .resolveWith<
-                                                                  Color>((Set<
-                                                                      MaterialState>
-                                                                  states) {
-                                                        if (states.contains(
-                                                            MaterialState
-                                                                .focused))
-                                                          return Colors.red;
-                                                        return Colors
-                                                            .green; // Defer to the widget's default.
-                                                      }),
-                                                    ),
-                                                    onPressed: () {
-                                                      //delete record
-
-                                                      showTwoAlertDialog(
-                                                          context,
-                                                          data[index][newIndex]
-                                                              ["name"]);
-                                                      setState(() {
+      backgroundColor: Colors.grey[850],
+      body: SingleChildScrollView(
+          reverse: true,
+          padding: EdgeInsets.only(bottom: bottom),
+          child: Center(
+            // Center is a layout widget. It takes a single child and positions it
+            // in the middle of the parent.
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                    margin: const EdgeInsets.only(top: 80.0),
+                    height: 450,
+                    child: Column(children: <Widget>[
+                      Text(
+                        'Birthdays',
+                        style: Theme.of(context).textTheme.headline4,
+                      ),
+                      Divider(),
+                      Expanded(
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: 12,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Center(
+                                child: Container(
+                                  margin: EdgeInsets.all(10),
+                                  color: Colors.green,
+                                  child: ExpansionPanelList(
+                                    animationDuration:
+                                        Duration(milliseconds: 1000),
+                                    children: [
+                                      if (data[index].length == 0) ...[
+                                        ExpansionPanel(
+                                          backgroundColor:
+                                              Colors.teal.withOpacity(0.7),
+                                          headerBuilder: (context, isExpanded) {
+                                            return ListTile(
+                                                tileColor: Colors.teal
+                                                    .withOpacity(0.7),
+                                                title: new Center(
+                                                  child: new Text(
+                                                    monthsList[index] +
+                                                        "(" +
                                                         data[index]
-                                                            .removeAt(newIndex);
-                                                      });
-                                                    },
-                                                    child: Text(
-                                                      'Delete',
-                                                      style: TextStyle(
-                                                          fontSize: 10.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.black),
-                                                      softWrap: false,
-                                                      overflow:
-                                                          TextOverflow.fade,
-                                                    ),
-                                                  ))
-                                                ]));
+                                                            .length
+                                                            .toString() +
+                                                        ")",
+                                                    style: TextStyle(
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black),
+                                                  ),
+                                                ));
                                           },
+                                          body: ListTile(
+                                              title: Center(
+                                            child: Text(
+                                                'No birthday this month',
+                                                style: TextStyle(
+                                                    color: Colors.black)),
+                                          )),
+                                          isExpanded: monthExpandedList[index],
+                                          canTapOnHeader: true,
                                         ),
-                                      ),
-                                      isExpanded: monthExpandedList[index],
-                                      canTapOnHeader: true,
-                                    ),
-                                  ],
-                                ],
-                                dividerColor: Colors.grey,
-                                expansionCallback: (panelIndex, isExpanded) {
-                                  monthExpandedList[index] =
-                                      !monthExpandedList[index];
-                                  setState(() {});
-                                },
-                              ),
-                            ),
-                          );
-                        }),
-                  )
-                ])),
-            Container(
-                margin: EdgeInsets.only(top: 20),
-                child: Text(
-                  'New Record',
-                  style: Theme.of(context).textTheme.headline4,
-                )),
-            Container(
-              margin: EdgeInsets.only(top: 15),
-              width: 200.0,
-              child: TextFormField(
-                controller: nameTextController,
-                decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Enter your username'),
-              ),
+                                      ] else ...[
+                                        ExpansionPanel(
+                                          backgroundColor:
+                                              Colors.teal.withOpacity(0.7),
+                                          headerBuilder: (context, isExpanded) {
+                                            return ListTile(
+                                                tileColor: Colors.white,
+                                                title: new Center(
+                                                  child: new Text(
+                                                    monthsList[index] +
+                                                        "(" +
+                                                        data[index]
+                                                            .length
+                                                            .toString() +
+                                                        ")",
+                                                    style: TextStyle(
+                                                        fontSize: 18.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.teal),
+                                                  ),
+                                                ));
+                                          },
+                                          body: ListTile(
+                                            tileColor: Colors.grey[800],
+                                            title: ListView.builder(
+                                              scrollDirection: Axis.vertical,
+                                              shrinkWrap: true,
+                                              itemCount: data[index].length,
+                                              itemBuilder: (context, newIndex) {
+                                                return new Center(
+                                                    child: new Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                      new Expanded(
+                                                          flex: 1,
+                                                          child:
+                                                              new SingleChildScrollView(
+                                                                  scrollDirection:
+                                                                      Axis.horizontal,
+                                                                  child: Text(
+                                                                    data[index][newIndex]
+                                                                            [
+                                                                            "name"] +
+                                                                        " | " +
+                                                                        data[index][newIndex]["day"]
+                                                                            .toString() +
+                                                                        " " +
+                                                                        monthsList[
+                                                                            index] +
+                                                                        " " +
+                                                                        data[index][newIndex]["year"]
+                                                                            .toString() +
+                                                                        " ",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16.0,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .bold,
+                                                                        color: Colors
+                                                                            .white),
+                                                                    softWrap:
+                                                                        false,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .fade,
+                                                                  ))),
+                                                      Flexible(
+                                                          child: MaterialButton(
+                                                        color: Colors.teal,
+                                                        shape: CircleBorder(),
+                                                        onPressed: () {
+                                                          //delete record
+
+                                                          showTwoAlertDialog(
+                                                              context,
+                                                              data[index]
+                                                                      [newIndex]
+                                                                  ["name"]);
+                                                          setState(() {
+                                                            data[index]
+                                                                .removeAt(
+                                                                    newIndex);
+                                                          });
+                                                          updateLocalStorage();
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(5),
+                                                          child: Text(
+                                                            'X',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 10),
+                                                          ),
+                                                        ),
+                                                      ))
+                                                    ]));
+                                              },
+                                            ),
+                                          ),
+                                          isExpanded: monthExpandedList[index],
+                                          canTapOnHeader: true,
+                                        ),
+                                      ],
+                                    ],
+                                    dividerColor: Colors.grey,
+                                    expansionCallback:
+                                        (panelIndex, isExpanded) {
+                                      monthExpandedList[index] =
+                                          !monthExpandedList[index];
+                                      setState(() {});
+                                    },
+                                  ),
+                                ),
+                              );
+                            }),
+                      )
+                    ])),
+                Divider(),
+                Container(
+                    margin: EdgeInsets.only(top: 20),
+                    child: Text(
+                      'Add Record',
+                      style: Theme.of(context).textTheme.headline4,
+                    )),
+                Container(
+                  margin: EdgeInsets.only(top: 15),
+                  width: 200.0,
+                  child: TextFormField(
+                    style: TextStyle(color: Colors.white),
+                    controller: nameTextController,
+                    decoration: InputDecoration(
+                        border: UnderlineInputBorder(),
+                        labelText: 'Enter name',
+                        labelStyle: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                Container(
+                  width: 200.0,
+                  child: TextFormField(
+                    style: TextStyle(color: Colors.white),
+                    controller: birthdatTextController,
+                    decoration: InputDecoration(
+                        border: UnderlineInputBorder(),
+                        labelText: 'Year(DD/MM/YYYY)',
+                        labelStyle: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
             ),
-            Container(
-              width: 200.0,
-              child: TextFormField(
-                controller: birthdatTextController,
-                decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Year(DD/MM/YYYY)'),
-              ),
-            ),
-          ],
-        ),
-      ),
+          )),
       floatingActionButton: FloatingActionButton(
         onPressed: _processInput,
         tooltip: 'Increment',
